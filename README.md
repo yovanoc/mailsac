@@ -10,6 +10,12 @@ Mailsac API Library
    <script type="text/javascript" src="https://unpkg.com/mailsac"></script>
    ```
 
+   and
+
+   ```javascript
+   const Client = new mailsac.Client("API_KEY");
+   ```
+
  * In Node.js
 
    ```
@@ -30,6 +36,8 @@ Mailsac API Library
 
 ## Development
 
+  You have to rename the config/default.example.json to config/default.json and put your mailsac api in order to run tests
+
  * Prerequisites
 
    ```
@@ -45,7 +53,10 @@ Mailsac API Library
     ```
     $ npm run lint:fix
     ```  
-
+* Run the tests
+    ```
+    $ npm run test
+    ```  
 
 * Build the js files
 
