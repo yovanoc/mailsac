@@ -1,7 +1,7 @@
 import * as chai from "chai";
 import * as config from "config";
 import * as mocha from "mocha";
-import { Client } from "../src/Client";
+import { Client } from "../dist/mailsac";
 
 const expect = chai.expect;
 

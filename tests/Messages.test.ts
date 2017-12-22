@@ -2,7 +2,7 @@ import * as chai from "chai";
 import * as chaiAsPromised from "chai-as-promised";
 import * as config from "config";
 import * as mocha from "mocha";
-import { Client } from "../src/Client";
+import { Client } from "../dist/mailsac";
 import { FolderTypes } from "../src/models/Message";
 
 chai.use(chaiAsPromised);
