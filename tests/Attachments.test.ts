@@ -25,7 +25,7 @@ describe("Attachments PUBLIC CLIENT", () => {
 describe("User PRIVATE CLIENT", () => {
   it("should get attachments", () => {
     return assert.isFulfilled(privateClient.getAttachments("azefaefafaezf@mailsac.com",
-      "8zyvIpiEfja3e7Hh2J877TWPanM1gIjE-0"));
+      "RS34MfYnj5niVvETiu0OgelGMWHnoIWe-0"));
   });
   // TODO: Download attachment
 });

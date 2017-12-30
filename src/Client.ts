@@ -131,7 +131,7 @@ export class Client {
    * @return {Promise<IMessage>}           message
    */
   public getMessage(email: string, messageId: string): Promise<IMessage> {
-    return this.request<IMessage>(`/api/addresses/${email}/messages/${messageId}`);
+    return this.request<IMessage>(`/addresses/${email}/messages/${messageId}`);
   }
 
   /**
@@ -438,7 +438,7 @@ export class Client {
         request.data = { ...request.data, ...{ _mailsacKey: this.apiKey ? this.apiKey : "" } };
       }
       this.axios.request(request)
-        .then((response) => resolve(response.data))
+        .then((response) => resolve(response.data as T))
         .catch((error) => {
           if (error.response) {
             let details;

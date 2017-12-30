@@ -11,7 +11,7 @@ const expect = chai.expect;
 const assert = chai.assert;
 
 const address = "azefaefafaezf@mailsac.com";
-const messageId = "8zyvIpiEfja3e7Hh2J877TWPanM1gIjE-0";
+const messageId = "RS34MfYnj5niVvETiu0OgelGMWHnoIWe-0";
 
 let publicClient: Client;
 let privateClient: Client;
@@ -39,13 +39,12 @@ describe("Messages PRIVATE CLIENT", () => {
     return assert.isFulfilled(privateClient.getSavedMessages());
   });
   it("should get a single message", () => {
-    return assert.isRejected(privateClient.getMessage(address, messageId));
+    return assert.isRejected(privateClient.getMessage(address, messageId)); // TODO: Should be fulfilled ...
   });
   it("should get private messages", () => {
     return assert.isFulfilled(privateClient.getPrivateMessages());
   });
   it("should search private messages", () => {
-    privateClient.searchPrivateMessages("test").catch((e) => console.log(e));
     return assert.isFulfilled(privateClient.searchPrivateMessages("test"));
   });
   it("should save a message", () => {
