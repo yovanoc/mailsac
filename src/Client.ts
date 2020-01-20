@@ -103,7 +103,7 @@ export class Client {
    * @return {Promise<void>}       void
    */
   public forwardAddress(email: string, options: IForwardOptions): Promise<void> {
-    return this.request(`/private-address-forwarding/${email}`, "put");
+    return this.request(`/private-address-forwarding/${email}`, "put", { data: options });
   }
 
   /**
