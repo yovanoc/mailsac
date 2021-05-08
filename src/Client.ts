@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosInstance, AxiosRequestConfig, Method } from "axios";
 import { ErrorCodes, IMailsacError } from "./JsonError";
 import { IAddress, IForwardOptions, IOwned } from "./models/Address";
 import { IAttachment } from "./models/Attachment";
@@ -33,14 +33,14 @@ export class Client {
   public apiKey?: string;
   private axios: AxiosInstance;
 
-  constructor(apiKey?: string) {
+  constructor(apiKey?: string, timeout = 3000) {
     this.apiKey = apiKey;
     this.axios = axios.create({
       baseURL: "https://mailsac.com/api/",
       // headers: {
       //   "Mailsac-Key": this.apiKey ? this.apiKey : "",
       // },
-      timeout: 3000,
+      timeout,
     });
   }
 
@@ -165,17 +165,33 @@ export class Client {
   }
 
   /**
-   * Set labels on a message.
-   * Any existing labels will be replaced with the new array of string labels.
-   * Maximum 3 labels per message.
+   * Add a label to a message
+   * To help organize messages and group messages together, add a label to a message. Labels are used in the Inbox UI to group messages.
+   * When successful, returns 200 with a subset of the message object.
+   * When the label already exists on the message, the message is not modified and the API endpoint returns 200.
+   * No PUT body is needed.
    * @param  {string}                   email     email
    * @param  {string}                   messageId messageId
-   * @param  {string[]}                 labels    labels list
+   * @param  {string}                   label     label
    * @return {Promise<ILabelsResponse>}           response
    */
-  public setMessageLabels(email: string, messageId: string, labels: string[]): Promise<ILabelsResponse> {
-    return this.request<ILabelsResponse>(`/addresses/${email}/messages/${messageId}/labels`,
-      "put", { data: { labels } });
+  public addMessageLabel(email: string, messageId: string, label: string): Promise<ILabelsResponse> {
+    return this.request<ILabelsResponse>(`/addresses/${email}/messages/${messageId}/labels/${encodeURIComponent(label)}`,
+      "put");
+  }
+
+  /**
+   * Remove a label from a message
+   * Removes a label from a message. Returns 200 with a subset of the message object when successful.
+   * When the label did not exists on the message, the message is not modified and the API endpoint returns 200.
+   * @param  {string}                   email     email
+   * @param  {string}                   messageId messageId
+   * @param  {string}                   label     label
+   * @return {Promise<ILabelsResponse>}           response
+   */
+   public removeMessageLabel(email: string, messageId: string, label: string): Promise<ILabelsResponse> {
+    return this.request<ILabelsResponse>(`/addresses/${email}/messages/${messageId}/labels/${encodeURIComponent(label)}`,
+      "delete");
   }
 
   /**
@@ -218,10 +234,10 @@ export class Client {
    * Use the querystring param ?download=1 to trigger file download in browser.
    * @param  {string}        email          email
    * @param  {string}        messageId      messageId
-   * @param  {[type]}        download=false download
+   * @param  {boolean}        download=false download
    * @return {Promise<IHeadersResponse>}    void
    */
-  public getMessageHeaders(email: string, messageId: string, download = false): Promise<IHeadersResponse> {
+  public getMessageHeaders(email: string, messageId: string, download: boolean = false): Promise<IHeadersResponse> {
     return this.request<IHeadersResponse>(`/headers/${email}/${messageId}`,
       "get", download ? { params: { download: 1 } } : undefined);
   }
@@ -231,7 +247,7 @@ export class Client {
    * Use the querystring param ?download=1 to trigger file download in browser.
    * @param  {string}          email          email
    * @param  {string}          messageId      messageId
-   * @param  {[type]}          download=false download
+   * @param  {boolean}          download=false download
    * @return {Promise<string>}                response
    */
   public getSanitizedMessage(email: string, messageId: string, download = false): Promise<string> {
@@ -258,10 +274,10 @@ export class Client {
    * Use the querystring param ?download=1 to trigger file download in browser.
    * @param  {string}          email          email
    * @param  {string}          messageId      messageId
-   * @param  {[type]}          download=false download
+   * @param  {boolean}          download=false download
    * @return {Promise<string>}                response
    */
-  public getMessageText(email: string, messageId: string, download = false): Promise<string> {
+  public async getMessageText(email: string, messageId: string, download: boolean = false): Promise<string> {
     return this.request<string>(`/text/${email}/${messageId}`, "get",
       download ? { params: { download: 1 } } : undefined);
   }
@@ -271,10 +287,10 @@ export class Client {
    * Use the querystring param ?download=1 to trigger file download in browser.
    * @param  {string}          email          email
    * @param  {string}          messageId      messageId
-   * @param  {[type]}          download=false download
+   * @param  {boolean}          download=false download
    * @return {Promise<string>}                response
    */
-  public getRawMessage(email: string, messageId: string, download = false): Promise<string> {
+  public async getRawMessage(email: string, messageId: string, download: boolean = false): Promise<string> {
     return this.request<string>(`/raw/${email}/${messageId}`, "get",
       download ? { params: { download: 1 } } : undefined);
   }
@@ -297,14 +313,8 @@ export class Client {
    * Get Current User
    * @return {Promise<IUser>} user
    */
-  public getCurrentUser(): Promise<IUser> {
-    return new Promise(async (resolve, reject) => {
-      const res = await this.request<IUser>(`/me`);
-      if ((res as any) === "") {
-        return reject("You have to be authenticated");
-      }
-      return resolve(res);
-    });
+  public getCurrentUser(): Promise<IUser | null> {
+    return this.request<IUser | null>(`/me`);
   }
 
   /**
@@ -401,7 +411,9 @@ export class Client {
    * @return {Promise<ICountResponse>}         response
    */
   public getTopAddresses(options: IQueryOptions): Promise<ICountResponse> {
-    return this.request<ICountResponse>(`/mailstats/top-addresses`);
+    return this.request<ICountResponse>(`/mailstats/top-addresses`, "get", {
+      params: options
+    });
   }
 
   /**
@@ -429,9 +441,9 @@ export class Client {
     });
   }
 
-  private request<T>(url: string, method = "get", config?: object): Promise<T> {
+  private request<T>(url: string, method: Method = "get", config?: Partial<AxiosRequestConfig>): Promise<T> {
     return new Promise((resolve, reject) => {
-      const request: any = { ...{ method, url }, ...config };
+      const request: AxiosRequestConfig = { ...{ method, url }, ...config };
       if (method === "get") {
         request.params = { ...request.params, ...{ _mailsacKey: this.apiKey ? this.apiKey : "" } };
       } else {
