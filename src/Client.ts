@@ -448,7 +448,7 @@ export class Client {
         .then((response) => resolve(response.data as T))
         .catch((error) => {
           if (error.response) {
-            let details;
+            let details = "";
             switch (error.response.status) {
               case ErrorCodes.BAD_REQUEST:
                 details = "Fix the validation error and try the request again";
