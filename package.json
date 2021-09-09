@@ -1,6 +1,6 @@
 {
   "name": "mailsac",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Mailsac API Library",
   "main": "dist/mailsac.js",
   "types": "dist/index.d.ts",

@@ -42,6 +42,6 @@ describe("Mail STATS", () => {
   // TODO: Download common attachment
   it("should check blacklisted", async () => {
     expect.assertions(1);
-    return expect(client.checkBlacklist("google.com")).resolves.toEqual(true);
+    return expect(client.checkBlacklist("https://google.com")).resolves.toEqual(true);
   });
 });

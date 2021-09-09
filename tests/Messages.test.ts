@@ -3,18 +3,37 @@ import { Client } from "../src";
 import { FolderTypes } from "../src/models/Message";
 
 const address = "azefaefafaezf@mailsac.com";
-const messageId = "6qlynvR_mUkTlGz1nV4dMQ0Ao-0";
+const messageId = "0sc5574uFAvXYjp1i2Nf8HUE6-0";
 
 let publicClient: Client;
 let privateClient: Client;
 
-beforeAll(async (done) => {
+beforeAll((done) => {
   publicClient = new Client();
   privateClient = new Client(config.get("MAILSAC_API_KEY"));
   done();
 });
 
 describe("Messages PUBLIC CLIENT", () => {
+  it("should send message", async () => {
+    expect.assertions(1);
+    return expect(privateClient.sendMessage({
+      from: address,
+      to: address,
+      text: "Ahahahahah",
+      subject: "Testing purposes :)",
+    })).rejects.toEqual(
+      {
+        details: "Fix the validation error and try the request again",
+        message: "You must purchase more outgoing messages before you can send.",
+        status: 400
+      }
+    )
+    // })).resolves.toMatchObject({
+    //   from: address,
+    //   to: [address]
+    // });
+  });
   it("should get all messages", async () => {
     expect.assertions(1);
     return expect(publicClient.getMessages(address)).rejects.toEqual({
@@ -92,42 +111,23 @@ describe("Messages PRIVATE CLIENT", () => {
   it("should get message headers", async () => {
     expect.assertions(1);
     return expect(privateClient.getMessageHeaders(address, messageId, true)).resolves.toMatchObject({
-      from: address
+      from: `Christopher Yovanovitch <yovano_c@outlook.com>`
     });
   });
   it("should get sanitized message", async () => {
     expect.assertions(1);
-    return expect(privateClient.getSanitizedMessage(address, messageId, true)).resolves.toEqual("<div>test</div>");
+    return expect(privateClient.getSanitizedMessage(address, messageId, true)).resolves.toEqual("<div>:)<br></div>");
   });
   it("should get html message", async () => {
     expect.assertions(1);
-    return expect(privateClient.getHTMLMessage(address, messageId, true)).resolves.toEqual("<div>test</div>");
+    return expect(privateClient.getHTMLMessage(address, messageId, true)).resolves.toEqual("<html><head><meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" /></head><body><div>:)<br /></div></body></html>");
   });
   it("should get text message", async () => {
     expect.assertions(1);
-    return expect(privateClient.getMessageText(address, messageId, true)).resolves.toEqual("test");
+    return expect(privateClient.getMessageText(address, messageId, true)).resolves.toEqual(":)\r");
   });
   it("should get raw message", async () => {
     expect.assertions(1);
     return expect(privateClient.getRawMessage(address, messageId, true)).resolves.toContain(`for <${address}>;`);
-  });
-  it("should send message", async () => {
-    expect.assertions(1);
-    return expect(privateClient.sendMessage({
-      from: address,
-      to: address,
-      text: "Ahahahahah",
-      subject: "Testing purposes :)",
-    })).rejects.toEqual(
-      {
-        details: "Fix the validation error and try the request again",
-        message: "You must purchase more outgoing messages before you can send.",
-        status: 400
-      }
-    )
-    // })).resolves.toMatchObject({
-    //   from: address,
-    //   to: [address]
-    // });
   });
 });
