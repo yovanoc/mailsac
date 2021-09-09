@@ -37,9 +37,9 @@ export class Client {
     this.apiKey = apiKey;
     this.axios = axios.create({
       baseURL: "https://mailsac.com/api/",
-      // headers: {
-      //   "Mailsac-Key": this.apiKey ? this.apiKey : "",
-      // },
+      headers: {
+        "Mailsac-Key": this.apiKey ? this.apiKey : "",
+      },
       timeout,
     });
   }
@@ -444,11 +444,6 @@ export class Client {
   private request<T>(url: string, method: Method = "get", config?: Partial<AxiosRequestConfig>): Promise<T> {
     return new Promise((resolve, reject) => {
       const request: AxiosRequestConfig = { ...{ method, url }, ...config };
-      if (method === "get") {
-        request.params = { ...request.params, ...{ _mailsacKey: this.apiKey ? this.apiKey : "" } };
-      } else {
-        request.data = { ...request.data, ...{ _mailsacKey: this.apiKey ? this.apiKey : "" } };
-      }
       this.axios.request(request)
         .then((response) => resolve(response.data as T))
         .catch((error) => {
